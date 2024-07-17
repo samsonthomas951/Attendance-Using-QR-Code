@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Attendance Statistics |{% endblock %}
+{% block style %}
+    <style>
+        .container{
+        width: 75%;
+        height: 75%;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        display: flex;
+        gap: 20px;
+        }
+        #h1 {   
+            color: black;
+            padding: 10px;
+            text-align: center
+        }
+        .stats {         
+        width: 75%;
+        height: 75%;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        gap: 20px;
+        display: block;
+        }
+        .stats p { margin: 10px 0; }
+    </style>
+{% endblock %}
+{% block content %}
+
+    <h1 id="h1">Attendance Statistics</h1>
+    <br>
+    <div class="stats">
+        <p>Total Users: {{ total_users }}</p>
+        <p>Present Users: {{ present_count }}</p>
+        <p>Absent Users: {{ absent_count }}</p>
+        <p>Attendance Rate: {{ attendance_rate }}%</p>
+    </div>
+    <br>
+    <h2 id="h1">Absent Users</h2>
+    <div class="container">
+    {% if absent_users %}
+    <table>
+    <thead>
+        <tr>
+          <th>Admission</th>
+          <th>Name</th>
+          <th>Number</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in absent_users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{user.first_name }}</td>
+                <td>  <a href="https://wa.me/+254{{user.email}}">{{user.email}}</a></td>
+
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p>No absent users today.</p>
+    {% endif %}
+    </div>
+{% endblock %}

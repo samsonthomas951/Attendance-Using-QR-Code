@@ -1,0 +1,143 @@
+{% extends 'base.html'%}
+
+
+{% block title %}Mark register|{% endblock%}
+
+{% block style %}
+    <style>
+        .container {
+            width: 75%;
+            height: 75%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 20px;
+        }
+        .left-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .qr-code {
+            width: 250px;
+            height: 250px;
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+        }
+        .otp-input {
+            width: 180px;
+            padding: 5px;
+        }
+        .add-person-btn {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .right-section {
+            flex: 1;
+            
+        }
+        .list-container {
+            border: 1px solid #ccc;
+            height: 300px;
+            overflow-y: auto;
+        }
+        .list-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+
+{% if messages %}
+<ul>
+    {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+<div class="container">
+    <div class="left-section">
+        <div class="qr-code">
+            <img id="qr-code-img" src="" alt="QR Code">
+        </div>
+        <br>
+        <br>
+        <form id="attendanceForm" method="post" action="{% url 'register' %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="add-person-btn">Submit</button>
+        </form>
+        <a href="{% url 'attendance_stats' %}" class="text-white px-5 py-3 rounded-xl bg-teal-600 hover:bg-teal-700">Done</a>
+    </div>
+    <div class="right-section">
+        <div class="list-title">Members present</div>
+        <div class="list-container">
+            <ul id="people-list">
+                {% for record in attendees %}
+                    <li>{{ record.user.username }} {{ record.timestamp }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <br><br>
+        <a href="{% url 'export_to_excel' %}" class="text-white px-5 py-3 rounded-xl bg-teal-600 hover:bg-teal-700">Export to Excel</a>
+        <a href="{% url 'upload_file' %}" class="text-white px-5 py-3 rounded-xl bg-teal-600 hover:bg-teal-700">Import Members</a>
+        
+    </div>
+</div>
+{% block scripts %} 
+<script>
+    function checkTrigger() {
+    fetch('/poll/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.trigger) {
+                refreshQRCode();
+            }
+        });
+    }
+    setInterval(checkTrigger, 500);
+    let intervalCounter = 0;
+
+    function refreshQRCode() {
+        console.log("Refreshing QR Code at", new Date().toISOString());
+        fetch('/qr-code/')
+            .then(response => response.blob())
+            .then(blob => {
+                var url = URL.createObjectURL(blob);
+                document.getElementById('qr-code-img').src = url;
+            });
+    }
+
+    window.onload = function() {
+        console.log("Page loaded at", new Date().toISOString());
+        refreshQRCode(); // Run once immediately when the page loads
+        intervalCounter++;
+        console.log("Setting interval counter:", intervalCounter);
+        setInterval(refreshQRCode, 30000); // Then run every 30 seconds
+    };
+</script>
+{% endblock %}
+{% endblock %}
